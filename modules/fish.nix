@@ -94,6 +94,14 @@
       merge = merge.attrs.flat;
     };
 
+    extraPackages = {
+      type = types.listOf types.derivation;
+      description = ''
+        Runtime dependencies to be injected into the wrapped package's path.
+      '';
+      merge = merge.lists.concat;
+    };
+
     # TODO: add impure variant of this
     interactiveShellInit = {
       type = types.string;
@@ -103,9 +111,10 @@
         Only ran when Fish is initialized interactively.
       '';
       default = promise (
-        { options }:
+        { inputs, options }:
         let
           inherit (builtins) attrNames concatMap concatStringsSep isAttrs isString replaceStrings;
+          inherit (inputs.nixpkgs.lib) makeBinPath splitString;
           escapeQuotes = replaceStrings [ "'" ] [ "\\'" ];
           abbrToString =
             {
@@ -148,7 +157,15 @@
           abbrsToString = abbrs: concatStringsSep "\n" (flattenAbbrs null abbrs);
         in
         concatStringsSep "\n" (
-          [
+          (
+            if options ? extraPackages then
+              let
+                paths = splitString ":" (makeBinPath options.extraPackages);
+              in [ "fish_add_path --path ${concatStringsSep " " paths}" ]
+            else
+              ""
+          )
+          ++ [
             "status is-interactive || exit 0"
           ]
           ++ (
