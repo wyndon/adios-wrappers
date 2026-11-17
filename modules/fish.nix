@@ -111,19 +111,10 @@
         Only ran when Fish is initialized interactively.
       '';
       default = promise (
-        { options }:
+        { inputs, options }:
         let
-          inherit (builtins)
-            attrNames
-            concatMap
-            concatStringsSep
-            isAttrs
-            isString
-            makeBinPath
-            replaceStrings
-            splitString
-            ;
-
+          inherit (builtins) attrNames concatMap concatStringsSep isAttrs isString replaceStrings;
+          inherit (inputs.nixpkgs.lib) makeBinPath splitString;
           paths = splitString ":" (makeBinPath options.extraPackages);
           escapeQuotes = replaceStrings [ "'" ] [ "\\'" ];
           abbrToString =
