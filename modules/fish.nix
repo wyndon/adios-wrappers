@@ -163,7 +163,7 @@
                 paths = splitString ":" (makeBinPath options.extraPackages);
               in [ "fish_add_path --path ${concatStringsSep " " paths}" ]
             else
-              ""
+              []
           )
           ++ [
             "status is-interactive || exit 0"
