@@ -115,6 +115,7 @@
         let
           inherit (builtins) attrNames concatMap concatStringsSep isAttrs isString replaceStrings;
           inherit (inputs.nixpkgs.lib) makeBinPath splitString;
+          paths = splitString ":" (makeBinPath options.extraPackages);
           escapeQuotes = replaceStrings [ "'" ] [ "\\'" ];
           abbrToString =
             {
@@ -159,9 +160,7 @@
         concatStringsSep "\n" (
           (
             if options ? extraPackages then
-              let
-                paths = splitString ":" (makeBinPath options.extraPackages);
-              in [ "fish_add_path --path ${concatStringsSep " " paths}" ]
+              [ "fish_add_path --path ${concatStringsSep " " paths}" ]
             else
               []
           )
